@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import Searchbar from './Searchbar/Searchbar';
 import ImageGallery from './ImageGallery/ImageGallery';
 import ImageGalleryItem from './ImageGallery/ImageGalleryItem/ImageGalleryItem';
@@ -7,95 +7,91 @@ import Button from './Button/Button';
 import Loader from './Loader/Loader';
 import Modal from './Modal/Modal';
 
-export class App extends Component {
-  state = {
-    searchQuery: '',
-    page: 0,
-    totalHits: null,
-    searchResults: [],
-    isLoading: false,
-    error: null,
-    largeImageURL: '',
-    isModalOpen: false,
-  };
+export const App = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(0);
+  const [totalHits, setTotalHits] = useState(null);
+  const [searchResults, setSearchResults] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const [largeImageURL, setLargeImageURL] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  async componentDidUpdate(_, prevState) {
-    const { searchQuery, page, searchResults } = this.state;
-    if (prevState.searchQuery !== searchQuery || prevState.page !== page) {
-      const response = await fetchImagesWithQuery(searchQuery, page);
-      this.setState({
-        searchResults: [...searchResults, ...response.data.hits],
-        isLoading: false,
-        totalHits: response.data.total,
-      });
+  useEffect(() => {
+    if (page === 0) {
+      return;
     }
-  }
+    setError(false);
+    try {
+      fetchImagesWithQuery(searchQuery, page).then(response => {
+        setSearchResults(searchResults => [
+          ...searchResults,
+          ...response.data.hits,
+        ]);
+        setTotalHits(response.data.totalHits);
+        setIsLoading(false);
+      });
+    } catch (error) {
+      setError(true);
+    } finally {
+      // setIsLoading(false);
+    }
+  }, [searchQuery, page]);
 
-  handleSubmit = e => {
+  const handleSubmit = e => {
     e.preventDefault();
     if (e.target.search.value === '') {
       return alert('Type something...');
     } else {
-      this.setState({
-        isLoading: true,
-        searchResults: [],
-        searchQuery: e.target.search.value.trim().toLowerCase(),
-        page: 1,
-      });
-
+      setIsLoading(true);
+      setSearchResults([]);
+      setSearchQuery(e.target.search.value.trim().toLowerCase());
+      setPage(1);
       e.target.reset();
     }
   };
 
-  handleLoadMore = () =>
-    this.setState({
-      isLoading: true,
-      page: this.state.page + 1,
-    });
-
-  openModal = e => {
-    this.setState({
-      isModalOpen: true,
-      largeImageURL: e.target.dataset.largeimageurl,
-    });
+  const handleLoadMore = () => {
+    setIsLoading(true);
+    setPage(page + 1);
   };
 
-  closeModal = () => {
-    this.setState({
-      isModalOpen: false,
-      largeImageURL: '',
-    });
+  const openModal = e => {
+    setIsModalOpen(true);
+    setLargeImageURL(e.target.dataset.largeimageurl);
   };
 
-  render() {
-    const { searchResults, isLoading, totalHits, isModalOpen, largeImageURL } =
-      this.state;
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setLargeImageURL('');
+  };
 
-    return (
-      <>
-        <Searchbar onSubmit={this.handleSubmit} />
-        {totalHits !== 0 ? (
-          <>
-            <ImageGallery
-              searchResults={searchResults}
-              onClick={this.openModal}
-              galleryItem={ImageGalleryItem}
-            />
-            {isLoading && <Loader />}
-          </>
-        ) : (
+  return (
+    <>
+      <Searchbar onSubmit={handleSubmit} />
+      {totalHits !== 0 ? (
+        <>
+          <ImageGallery
+            searchResults={searchResults}
+            onClick={openModal}
+            galleryItem={ImageGalleryItem}
+          />
+          {isLoading && <Loader />}
+        </>
+      ) : (
+        (error && <p className="info">Oops... something went wrong :(</p>) || (
           <p className="info">Oops... Nothing found :(</p>
-        )}
-        {searchResults.length >= 12 && searchResults.length !== totalHits ? (
-          <Button onClick={this.handleLoadMore} />
-        ) : (
-          totalHits && !isLoading && <p className="info">End of results</p>
-        )}
-        ;
-        {isModalOpen && (
-          <Modal closeModal={this.closeModal} largeImageURL={largeImageURL} />
-        )}
-      </>
-    );
-  }
-}
+        )
+      )}
+      {searchResults.length >= 12 && searchResults.length !== totalHits ? (
+        <Button onClick={handleLoadMore} />
+      ) : (
+        totalHits && !isLoading && <p className="info">End of results</p>
+      )}
+      ;
+      {isModalOpen && (
+        <Modal closeModal={closeModal} largeImageURL={largeImageURL} />
+      )}
+    </>
+  );
+};
