@@ -86,7 +86,6 @@ export const App = () => {
       ) : (
         totalHits && !isLoading && <p className="info">End of results</p>
       )}
-      ;
       {isModalOpen && (
         <Modal closeModal={closeModal} largeImageURL={largeImageURL} />
       )}
