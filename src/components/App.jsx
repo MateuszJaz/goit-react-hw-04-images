@@ -33,8 +33,6 @@ export const App = () => {
       });
     } catch (error) {
       setError(true);
-    } finally {
-      // setIsLoading(false);
     }
   }, [searchQuery, page]);
 
