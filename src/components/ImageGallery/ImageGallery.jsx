@@ -1,7 +1,8 @@
 import style from './imageGallery.module.css';
 import PropTypes from 'prop-types';
+import GalleryItem from './ImageGalleryItem/ImageGalleryItem';
 
-const ImageGallery = ({ galleryItem: GalleryItem, searchResults, onClick }) => {
+const ImageGallery = ({ searchResults, onClick }) => {
   return (
     <ul className={style.gallery}>
       <GalleryItem searchResults={searchResults} onClick={onClick} />
@@ -10,7 +11,6 @@ const ImageGallery = ({ galleryItem: GalleryItem, searchResults, onClick }) => {
 };
 
 ImageGallery.propTypes = {
-  galleryItem: PropTypes.func.isRequired,
   searchResults: PropTypes.array.isRequired,
   onClick: PropTypes.func.isRequired,
 };

@@ -1,36 +1,33 @@
-import React from 'react';
+import { useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 import style from './modal.module.css';
 
-class Modal extends React.Component {
-  componentDidMount() {
-    window.addEventListener('keydown', this.handleClose);
-  }
+const Modal = ({ largeImageURL, closeModal }) => {
+  useEffect(() => {
+    const handleClose = e => {
+      if (e.key === 'Escape' || e.target === e.target.closest('div')) {
+        closeModal();
+      }
 
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.handleClose);
-    window.removeEventListener('click', this.handleClose);
-  }
+      window.addEventListener('keydown', handleClose);
+      window.addEventListener('click', handleClose);
+    };
 
-  handleClose = e => {
-    if (e.code === 'Escape' || e.target !== e.target.closest('img')) {
-      return this.props.closeModal();
-    }
-  };
+    return () => {
+      window.removeEventListener('keydown', handleClose);
+      window.addEventListener('click', handleClose);
+    };
+  }, [closeModal]);
 
-  render() {
-    const { largeImageURL } = this.props;
-    return (
-      <div className={style.overlay} onClick={this.handleClose}>
-        <div className={style.modal}>
-          <img src={largeImageURL} alt="" />
-        </div>
+  return (
+    <div className={style.overlay}>
+      <div className={style.modal}>
+        <img src={largeImageURL} alt="" />
       </div>
-    );
-  }
-}
-
+    </div>
+  );
+};
 Modal.propTypes = {
   closeModal: PropTypes.func,
   largeImageURL: PropTypes.string.isRequired,

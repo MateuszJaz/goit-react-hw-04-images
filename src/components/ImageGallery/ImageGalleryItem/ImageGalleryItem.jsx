@@ -4,7 +4,13 @@ import PropTypes from 'prop-types';
 const GalleryItem = ({ searchResults, onClick }) => {
   return searchResults.map(({ webformatURL, largeImageURL }) => {
     return (
-      <li key={webformatURL} className={style.galleryItem} onClick={onClick}>
+      <li
+        key={webformatURL}
+        className={style.galleryItem}
+        onClick={() => {
+          onClick({ show: true, url: largeImageURL });
+        }}
+      >
         <img
           className={style.galleryItemImage}
           src={webformatURL}

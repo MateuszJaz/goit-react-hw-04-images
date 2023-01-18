@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import Searchbar from './Searchbar/Searchbar';
 import ImageGallery from './ImageGallery/ImageGallery';
-import ImageGalleryItem from './ImageGallery/ImageGalleryItem/ImageGalleryItem';
 import fetchImagesWithQuery from 'services/api';
 import Button from './Button/Button';
 import Loader from './Loader/Loader';
@@ -14,8 +13,10 @@ export const App = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
-  const [largeImageURL, setLargeImageURL] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modal, setModal] = useState({
+    show: false,
+    url: '',
+  });
 
   useEffect(() => {
     if (page === 0) {
@@ -54,26 +55,12 @@ export const App = () => {
     setPage(page + 1);
   };
 
-  const openModal = e => {
-    setIsModalOpen(true);
-    setLargeImageURL(e.target.dataset.largeimageurl);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setLargeImageURL('');
-  };
-
   return (
     <>
       <Searchbar onSubmit={handleSubmit} />
       {totalHits !== 0 ? (
         <>
-          <ImageGallery
-            searchResults={searchResults}
-            onClick={openModal}
-            galleryItem={ImageGalleryItem}
-          />
+          <ImageGallery searchResults={searchResults} onClick={setModal} />
           {isLoading && <Loader />}
         </>
       ) : (
@@ -86,8 +73,13 @@ export const App = () => {
       ) : (
         totalHits && !isLoading && <p className="info">End of results</p>
       )}
-      {isModalOpen && (
-        <Modal closeModal={closeModal} largeImageURL={largeImageURL} />
+      {modal.show && (
+        <Modal
+          closeModal={() => {
+            setModal({ show: false, url: '' });
+          }}
+          largeImageURL={modal.url}
+        />
       )}
     </>
   );
